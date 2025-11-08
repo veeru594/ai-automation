@@ -1,0 +1,8 @@
+__pycache__/
+.env
+*.json
+*.csv
+node_modules/
+venv/
+.DS_Store
+*.log
