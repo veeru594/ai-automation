@@ -1,42 +1,28 @@
-import os
 import requests
 from ai_brain.config import SERPAPI_KEY
 
-def fetch_trending_topics(query="digital marketing trends", num_results=5):
-    """
-    Fetch trending topics from Google News via SerpAPI.
-    Returns a list of trending headlines or topics.
-    """
-    if not SERPAPI_KEY:
-        print("⚠️ No SerpAPI key found, using fallback topics.")
-        return [
-            "AI-driven marketing campaigns",
-            "SEO automation trends",
-            "Influencer marketing in 2025",
-            "Data-driven personalization",
-            "Future of digital advertising"
-        ]
+def fetch_real_news():
+    API_KEY = SERPAPI_KEY
+    search_queries = [
+        "digital marketing news 2026",
+        "AI marketing updates",
+        "social media platform updates",
+    ]
 
-    url = "https://serpapi.com/search"
-    params = {
-        "engine": "google_news",
-        "q": query,
-        "api_key": SERPAPI_KEY,
-        "num": num_results,
-        "hl": "en"
-    }
+    results = []
 
-    try:
-        response = requests.get(url, params=params)
-        data = response.json()
+    for q in search_queries:
+        url = f"https://serpapi.com/search.json?q={q}&tbm=nws&api_key={API_KEY}"
+        res = requests.get(url).json()
 
-        headlines = [item["title"] for item in data.get("news_results", [])[:num_results]]
-        return headlines or ["No trends found."]
+        if "news_results" in res and len(res["news_results"]) > 0:
+            top_item = res["news_results"][0]
+            results.append({
+                "title": top_item.get("title", "").strip(),
+                "snippet": top_item.get("snippet", "").strip()
+            })
 
-    except Exception as e:
-        print("⚠️ Error fetching trends:", e)
-        return [
-            "Digital marketing innovation",
-            "AI in customer engagement",
-            "Automation for small businesses"
-        ]
+        if len(results) == 3:
+            break
+
+    return results
