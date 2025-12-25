@@ -1,9 +1,18 @@
+# Python
 __pycache__/
-.env
-.env.example
-*.json
-*.csv
-node_modules/
+*.pyc
+
+# Virtual environments
+.venv/
 venv/
+.venv_image/
+
+# OS
 .DS_Store
+
+# Logs
 *.log
+log.json
+
+# Outputs / generated files
+outputs/
