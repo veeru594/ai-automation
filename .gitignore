@@ -1,11 +1,10 @@
-# Python
+
+
+.env
+.env.*
 __pycache__/
 *.pyc
-
-# Virtual environments
-.venv/
-venv/
-.venv_image/
+posted_titles.json
 
 # OS
 .DS_Store
