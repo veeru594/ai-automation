@@ -1,0 +1,2 @@
+# Placeholder - replace with actual background image
+# bg_cover.jpg should be 1080x1350 dark futuristic gradient
