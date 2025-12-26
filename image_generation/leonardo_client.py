@@ -87,6 +87,17 @@ def create_generation(
 
     return _safe_post(payload)
 
+def generate_background_prompt(topic: str) -> str:
+    """
+    Generate a prompt optimized for background images (no text, abstract).
+    """
+    return (
+        f"abstract 3d render representing {topic}, "
+        "futuristic, cyberpunk lighting, dark blue and orange aesthetics, "
+        "unreal engine 5 render, octane render, 8k, ultra detailed, "
+        "clean composition, --no text, --no words, --no letters"
+    )
+
 
 # ----------------------------
 # Polling until generation completes

@@ -19,9 +19,9 @@ LEONARDO_GET_URL = "https://cloud.leonardo.ai/api/rest/v1/generations"  # GET {L
 # Model ID we will use (Lightning XL example). Update from dashboard if changed.
 LEONARDO_LIGHTNING_MODEL_ID = os.getenv("LEONARDO_MODEL_ID") or "ac614f96-1082-45bf-be9d-757f2d31c174" # DreamShaper v7
 
-# Defaults for image sizes (we request 1024x768 and then resize to 1080x1350 IG)
-LEONARDO_REQUEST_WIDTH = 1024
-LEONARDO_REQUEST_HEIGHT = 768
+# Defaults for image sizes (we request 768x1024 for Portrait/Vertical aspect)
+LEONARDO_REQUEST_WIDTH = 768
+LEONARDO_REQUEST_HEIGHT = 1024
 
 # Output
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
@@ -29,4 +29,4 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Polling
 LEONARDO_POLL_INTERVAL = float(os.getenv("LEONARDO_POLL_INTERVAL", "2.5"))
-LEONARDO_POLL_MAX_SECS = int(os.getenv("LEONARDO_POLL_MAX_SECS", "120"))
+LEONARDO_POLL_MAX_SECS = int(os.getenv("LEONARDO_POLL_MAX_SECS", "300"))

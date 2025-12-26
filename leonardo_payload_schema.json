@@ -1,0 +1,13 @@
+{
+    "image_ratio": "4:5",
+    "slides": [
+        {
+            "slide_index": 1,
+            "text_blocks": {
+                "headline": "",
+                "subheadline": ""
+            },
+            "style_hint": ""
+        }
+    ]
+}

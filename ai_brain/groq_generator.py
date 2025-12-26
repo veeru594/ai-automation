@@ -8,62 +8,107 @@ def _clean_json(raw: str) -> str:
     return raw.strip().replace("```json", "").replace("```", "").strip()
 
 
-def generate_three_news_prompts(news_items):
+def evaluate_and_summarize(news_items):
     """
-    Accepts list of 3 SERP news dicts:
-    [{title: "...", snippet: "..."}, ...]
-
-    Returns:
+    Editorial gatekeeper: approve or reject news signals.
+    
+    Input schema (from trend_fetcher):
+    [
+        {
+            "entity": str,
+            "title": str,
+            "snippet": str,
+            "source": str,
+            "url": str
+        }
+    ]
+    
+    Output schema:
     {
-      "slides": [
-        {"slide":2, "headline":"...", "insight":"..."},
-        {"slide":3, "headline":"...", "insight":"..."},
-        {"slide":4, "headline":"...", "insight":"..."}
-      ]
+        "approved": [
+            {
+                "entity": str,              # Platform/company name
+                "update_type": str,         # "feature_release" | "algorithm_change" | "policy_update"
+                "summary": str,             # One sentence factual summary
+                "takeaway": str,            # Tactical implication (20-25 words)
+                "confidence": str           # "confirmed" | "reported" | "rumored"
+            }
+        ],
+        "rejected": [
+            {
+                "title": str,
+                "reason": str               # Why it was rejected
+            }
+        ]
     }
     """
-
+    
     if not GROQ_API_KEY:
+        # Fallback: minimal approved set
         return {
-            "slides": [
-                {"slide": 2, "headline": "AI Boosts Marketing Automation Efficiency", "insight": "Brands gain faster workflows with improved AI tools."},
-                {"slide": 3, "headline": "Instagram Tests Smarter Content Ranking System", "insight": "Creators may see improved engagement with algorithm updates."},
-                {"slide": 4, "headline": "Google Adds Insights To Search Console Tools", "insight": "Marketers get clearer visibility into ranking changes."}
-            ]
+            "approved": [
+                {
+                    "entity": "Instagram",
+                    "update_type": "feature_release",
+                    "summary": "Instagram expands Reels to 10 minutes",
+                    "takeaway": "Creators can now publish longer-form content without external platforms",
+                    "confidence": "confirmed"
+                }
+            ],
+            "rejected": []
         }
 
-    # Build GROQ prompt
-    prompt = f"""
-You will receive 3 REAL NEWS ITEMS fetched from Google News (SERP).
+    # Build editorial prompt
+    prompt = f"""You are an editorial gatekeeper for a tech marketing news channel.
 
-Rewrite each item into a clean, professional Instagram news slide.
+INPUT: {len(news_items)} news signals from SERP.
 
-RULES:
-- Each item becomes ONE slide only.
-- Headline must be 6–10 words, punchy, factual, not clickbait.
-- Insight must be a single sentence (12–20 words) explaining why the update matters.
-- No invented facts.
-- Keep it concise, neutral, and industry-relevant.
-- Output valid JSON only.
+TASK: Classify each as APPROVED or REJECTED.
+
+APPROVAL CRITERIA:
+- Specific feature launches, algorithm updates, or policy changes
+- Confirmed by credible source
+- Relevant to digital marketers
+
+REJECTION CRITERIA:
+- Opinion pieces, predictions, or "Top 10" lists
+- Generic trends without specific updates
+- Speculative or unconfirmed rumors
 
 INPUT NEWS:
-1. Title: {news_items[0]["title"]}
-   Summary: {news_items[0]["snippet"]}
+"""
+    
+    for i, item in enumerate(news_items, 1):
+        prompt += f"{i}. Entity: {item.get('entity', 'Unknown')}\n"
+        prompt += f"   Title: {item.get('title', '')}\n"
+        prompt += f"   Snippet: {item.get('snippet', '')}\n"
+        prompt += f"   Source: {item.get('source', '')}\n\n"
+    
+    prompt += """
+OUTPUT RULES:
+- If a signal is weak/speculative, REJECT it with reason
+- Do NOT invent updates that aren't in the input
+- Classify update_type as: "feature_release", "algorithm_change", or "policy_update"
+- Confidence: "confirmed" (official announcement), "reported" (credible journalism), "rumored" (unverified)
 
-2. Title: {news_items[1]["title"]}
-   Summary: {news_items[1]["snippet"]}
-
-3. Title: {news_items[2]["title"]}
-   Summary: {news_items[2]["snippet"]}
-
-OUTPUT FORMAT:
-{{
-  "slides": [
-    {{ "slide": 2, "headline": "", "insight": "" }},
-    {{ "slide": 3, "headline": "", "insight": "" }},
-    {{ "slide": 4, "headline": "", "insight": "" }}
+OUTPUT FORMAT (valid JSON only):
+{
+  "approved": [
+    {
+      "entity": "Platform Name",
+      "update_type": "feature_release",
+      "summary": "One sentence factual description",
+      "takeaway": "Tactical implication for marketers (20-25 words)",
+      "confidence": "confirmed"
+    }
+  ],
+  "rejected": [
+    {
+      "title": "Original headline",
+      "reason": "Specific reason for rejection"
+    }
   ]
-}}
+}
 """
 
     headers = {
@@ -74,7 +119,7 @@ OUTPUT FORMAT:
     payload = {
         "model": "llama-3.3-70b-versatile",
         "messages": [{"role": "user", "content": prompt}],
-        "temperature": 0.2
+        "temperature": 0.1  # Lower temp = more deterministic
     }
 
     try:
