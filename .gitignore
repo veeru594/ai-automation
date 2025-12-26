@@ -17,3 +17,12 @@ image_generation/.venv_image/
 # Runtime / local junk
 posted_titles.json
 tatus
+
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated outputs
+outputs/
+
