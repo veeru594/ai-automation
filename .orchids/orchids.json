@@ -1,7 +1,0 @@
-{
-  "projectId": "ai-automation-carousel",
-  "createdAt": 1767071748481,
-  "startupCommands": [
-    "python generate_full_polished.py"
-  ]
-}

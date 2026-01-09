@@ -230,7 +230,7 @@ def build_leonardo_text_prompt(title: str, content: str) -> str:
     return f"""
 Create a high-quality Instagram carousel background visual.
 
-Topic: {{TOPIC}}
+Topic: {title}
 
 Guidelines:
 - Do NOT include long text or paragraphs
@@ -243,7 +243,6 @@ Technical:
 - Square (1:1)
 - High contrast
 - Sharp, production-quality image
-
 """
 
 def generate_leonardo_slide(output_dir: str, slide_num: int, title: str, content: str) -> str:

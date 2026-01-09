@@ -1,6 +1,6 @@
 import json
 import os
-from ai_brain.groq_generator import generate_three_news_prompts
+from ai_brain.editorial_gate import evaluate_news
 from ai_brain.trend_fetcher import fetch_real_news
 from ai_brain.carousel_generator import make_dir, generate_leonardo_slide
 from ai_brain.yoi_templates import (
@@ -17,9 +17,41 @@ def main():
     raw_news = fetch_real_news()
     print("📌 Raw SERP news items:", raw_news)
 
-    # STEP 2: Convert to slide-friendly structure
-    slides_data = generate_three_news_prompts(raw_news)
-    print("\n📝 Groq Output:")
+    # STEP 2: Editorial Gate (Filter & Format)
+    print("🧠 analyzing news signals with Editorial Gate...")
+    editorial_output = evaluate_news(raw_news, [])
+    approved_items = editorial_output.get("approved", [])
+    
+    print(f"✅ Approved {len(approved_items)} items.")
+
+    if not approved_items:
+        print("⚠️ No approved news items found. Using fallback content.")
+        approved_items = [
+             {
+                "summary": "Instagram expands Reels to 10 minutes",
+                "marketer_impact": "Creators need to rethink their content strategy for longer-form retention."
+             },
+             {
+                "summary": "Google pushes new standard for SEO",
+                 "marketer_impact": "Websites must optimize for user experience metrics."
+             },
+             {
+                 "summary": "TikTok launches new ad format",
+                 "marketer_impact": "Brands can now target users with interactive polls."
+             }
+        ]
+
+    # Map to slide format (Limit to 3)
+    slides_list = []
+    for i, item in enumerate(approved_items[:3]):
+        slides_list.append({
+            "slide": i + 2,
+            "headline": item.get("summary", "No Headline"),
+            "insight": item.get("marketer_impact", "No Insight")
+        })
+    
+    slides_data = {"slides": slides_list}
+    print("\n📝 Slides Data:")
     print(json.dumps(slides_data, indent=2))
 
     out_dir = make_dir("yoi_carousel")
